@@ -23,10 +23,14 @@ public class Player extends Entity {
 
 	private BufferedImage playerDamage;
 
+	private boolean arma = false;
+
 	public int ammo = 0;
 
 	public boolean isDamaged = false;
 	private int damageFrames = 0;
+
+	public boolean shoot = false;
 
 	public double life = 100, maxlife = 100;
 
@@ -79,22 +83,49 @@ public class Player extends Entity {
 
 		checkCollisionLifePack();
 		checkCollisionAmmo();
-		
-		if(isDamaged) {
+		checkCollisionGun();
+
+		if (isDamaged) {
 			this.damageFrames++;
-			if(this.damageFrames == 8) {
+			if (this.damageFrames == 8) {
 				this.damageFrames = 0;
 				isDamaged = false;
 			}
 		}
-		
-		if(life <= 0) {
+
+		if (shoot) {
+
+			shoot = false;
+
+			if (arma && ammo > 0) {
+
+				ammo--;
+
+				// Criar bala e atirar!
+
+				int dx = 0;
+				int px = 0;
+				int py = 6;
+				if (dir == right_dir) {
+					px = 18;
+					dx = 1;
+				} else {
+					px = -8;
+					dx = -1;
+				}
+
+				BulletShoot bullet = new BulletShoot(this.getX() + px, this.getY() + py, 3, 3, null, dx, 0);
+				Game.bullets.add(bullet);
+			}
+		}
+
+		if (life <= 0) {
 			Game.entities.clear();
 			Game.enemies.clear();
 			Game.entities = new ArrayList<Entity>();
 			Game.enemies = new ArrayList<Enemy>();
 			Game.spritesheet = new Spritesheet("/spritesheet.png");
-			Game.player = new Player(0,0,16,16, Game.spritesheet.getSprite(32, 0, 16, 16));
+			Game.player = new Player(0, 0, 16, 16, Game.spritesheet.getSprite(32, 0, 16, 16));
 			Game.entities.add(Game.player);
 			Game.world = new World("/map.png");
 			return;
@@ -105,13 +136,26 @@ public class Player extends Entity {
 
 	}
 
+	public void checkCollisionGun() {
+		for (int i = 0; i < Game.entities.size(); i++) {
+			Entity atual = Game.entities.get(i);
+			if (atual instanceof Weapon) {
+				if (Entity.isColidding(this, atual)) {
+					arma = true;
+					System.out.println("Pegou a arma");
+					Game.entities.remove(atual);
+				}
+			}
+		}
+	}
+
 	public void checkCollisionAmmo() {
 		for (int i = 0; i < Game.entities.size(); i++) {
 			Entity atual = Game.entities.get(i);
 			if (atual instanceof Bullet) {
 				if (Entity.isColidding(this, atual)) {
 					ammo += 10;
-					System.out.println("Munição atual: " + ammo);
+					// System.out.println("Munição atual: " + ammo);
 					Game.entities.remove(atual);
 				}
 			}
@@ -136,11 +180,17 @@ public class Player extends Entity {
 		if (!isDamaged) {
 			if (dir == right_dir) {
 				g.drawImage(rightPlayer[index], this.getX() - Camera.x, this.getY() - Camera.y, null);
+				if (arma) {
+					// Desenhar arma para direita.
+					g.drawImage(Entity.GUN_RIGHT, this.getX() + 8 - Camera.x, this.getY() - Camera.y, null);
+				}
 			} else if (dir == left_dir) {
 				g.drawImage(leftPlayer[index], this.getX() - Camera.x, this.getY() - Camera.y, null);
+				// Desenhar arma para esquerda.
+				g.drawImage(Entity.GUN_LEFT, this.getX() - 8 - Camera.x, this.getY() - Camera.y, null);
 			}
-		}else {
-			g.drawImage(playerDamage, this.getX()-Camera.x, this.getY() - Camera.y, null);
+		} else {
+			g.drawImage(playerDamage, this.getX() - Camera.x, this.getY() - Camera.y, null);
 		}
 	}
 
