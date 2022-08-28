@@ -2,9 +2,7 @@ package entities;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 
-import graficos.Spritesheet;
 import main.Game;
 import world.Camera;
 import world.World;
@@ -82,9 +80,10 @@ public class Player extends Entity {
 			}
 		}
 
-		checkCollisionLifePack();
+		
 		checkCollisionAmmo();
 		checkCollisionGun();
+		checkCollisionLifePack();
 
 		if (isDamaged) {
 			this.damageFrames++;
@@ -106,32 +105,32 @@ public class Player extends Entity {
 
 				int dx = 0;
 				int px = 0;
-				int py = 6;
+				int py = 8;
 				if (dir == right_dir) {
-					px = 18;
+					px = 16;
 					dx = 1;
 				} else {
 					px = -8;
 					dx = -1;
 				}
 
-				BulletShoot bullet = new BulletShoot(this.getX() + px, this.getY() + py, 3, 3, null, dx, 0);
-				Game.bullets.add(bullet);
+				BulletShoot bulletShoot = new BulletShoot(this.getX() + px, this.getY() + py, 3, 3, null, dx, 0);
+				Game.bullets.add(bulletShoot);
 			}
 		}
 		
 		if(mouseShoot) {
 			mouseShoot = false;
-			System.out.println("atirou");
-			double angle;
-
-			int px = 0;
-			int py = 8;
+			//System.out.println("atirou");
 			
 			if (arma && ammo > 0) {
 
 				ammo--;
-
+				
+				double angle = 0;
+				int px = 0;
+				int py = 8;
+				
 				if (dir == right_dir) {
 					px = 18;
 					angle = Math.atan2(my - (this.getY() + py - Camera.y), mx - (this.getX() + px - Camera.x));
@@ -143,21 +142,15 @@ public class Player extends Entity {
 				double dx = Math.cos(angle);
 				double dy = Math.sin(angle);
 
-				BulletShoot bullet = new BulletShoot(this.getX() + px, this.getY() + py, 3, 3, null, dx, dy);
-				Game.bullets.add(bullet);
+				BulletShoot bulletShoot = new BulletShoot(this.getX() + px, this.getY() + py, 3, 3, null, dx, dy);
+				Game.bullets.add(bulletShoot);
 			}
 		}
 
 		if (life <= 0) {
-			Game.entities.clear();
-			Game.enemies.clear();
-			Game.entities = new ArrayList<Entity>();
-			Game.enemies = new ArrayList<Enemy>();
-			Game.spritesheet = new Spritesheet("/spritesheet.png");
-			Game.player = new Player(0, 0, 16, 16, Game.spritesheet.getSprite(32, 0, 16, 16));
-			Game.entities.add(Game.player);
-			Game.world = new World("/map.png");
-			return;
+			//GAME OVER
+			life = 0;
+			Game.gameState = "GAME_OVER";
 		}
 
 		Camera.x = Camera.clamp(this.getX() - (Game.WIDTH / 2), 0, World.WIDTH * 16 - Game.WIDTH);
@@ -171,8 +164,8 @@ public class Player extends Entity {
 			if (atual instanceof Weapon) {
 				if (Entity.isColidding(this, atual)) {
 					arma = true;
-					System.out.println("Pegou a arma");
-					Game.entities.remove(atual);
+					//System.out.println("Pegou a arma");
+					Game.entities.remove(i);
 				}
 			}
 		}
@@ -185,7 +178,11 @@ public class Player extends Entity {
 				if (Entity.isColidding(this, atual)) {
 					ammo += 20;
 					// System.out.println("Munição atual: " + ammo);
-					Game.entities.remove(atual);
+					if(ammo >= 100) {
+						ammo = 100;
+					}
+					Game.entities.remove(i);
+					return;
 				}
 			}
 		}
@@ -195,11 +192,13 @@ public class Player extends Entity {
 		for (int i = 0; i < Game.entities.size(); i++) {
 			Entity atual = Game.entities.get(i);
 			if (atual instanceof Lifepack) {
-				if (Entity.isColidding(this, atual)) {
+				if (Entity.isColidding(this, atual) && life < 100) {
 					life += 10;
-					if (life >= 100)
+					if (life >= 100) {
 						life = 100;
-					Game.entities.remove(atual);
+					}	
+					Game.entities.remove(i);
+					return;
 				}
 			}
 		}
@@ -211,12 +210,14 @@ public class Player extends Entity {
 				g.drawImage(rightPlayer[index], this.getX() - Camera.x, this.getY() - Camera.y, null);
 				if (arma) {
 					// Desenhar arma para direita.
-					g.drawImage(Entity.GUN_RIGHT, this.getX() + 8 - Camera.x, this.getY() - Camera.y, null);
+					g.drawImage(Entity.GUN_RIGHT, this.getX() + 7 - Camera.x, this.getY() - Camera.y, null);
 				}
 			} else if (dir == left_dir) {
 				g.drawImage(leftPlayer[index], this.getX() - Camera.x, this.getY() - Camera.y, null);
 				// Desenhar arma para esquerda.
-				g.drawImage(Entity.GUN_LEFT, this.getX() - 8 - Camera.x, this.getY() - Camera.y, null);
+				if(arma) {
+					g.drawImage(Entity.GUN_LEFT, this.getX() - 8 - Camera.x, this.getY() - Camera.y, null);
+				}
 			}
 		} else {
 			g.drawImage(playerDamage, this.getX() - Camera.x, this.getY() - Camera.y, null);
