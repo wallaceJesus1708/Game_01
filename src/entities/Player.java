@@ -4,6 +4,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
 import main.Game;
+import main.Sound;
 import world.Camera;
 import world.World;
 
@@ -103,6 +104,8 @@ public class Player extends Entity {
 
 				// Criar bala e atirar!
 
+				Sound.shootEffect.play();
+				
 				int dx = 0;
 				int px = 0;
 				int py = 8;

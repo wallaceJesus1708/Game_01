@@ -64,6 +64,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 	public Menu menu;
 	
 	public Game() {
+		Sound.musicBackground.loop();
 		rand = new Random();
 		addKeyListener(this);
 		addMouseListener(this);
@@ -284,6 +285,14 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 		
 		if(e.getKeyCode() == KeyEvent.VK_ENTER) {
 			this.restartGame = true;
+			if(gameState == "MENU") {
+				menu.enter = true;
+			}
+		}
+		
+		if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+			gameState = "MENU";
+			menu.pause = true;
 		}
 		
 	}
