@@ -29,6 +29,14 @@ public class Menu {
 	public static boolean saveGame = false;
 
 	public void tick() {
+		
+		File file = new File("save.txt");
+		if(file.exists()) {
+			saveExists = true;
+		}else {
+			saveExists = false;
+		}
+		
 		if (up) {
 			up = false;
 			currentOption--;
@@ -48,6 +56,14 @@ public class Menu {
 			if (options[currentOption] == "novo jogo" || options[currentOption] == "continuar") {
 				Game.gameState = "NORMAL";
 				pause = false;
+				file = new File("save.txt");
+				file.delete();
+			}else if(options[currentOption] == "carregar jogo") {
+				file = new File("save.txt");
+				if(file.exists()) {
+					String saver = loadGame(10);
+					applySave(saver);
+				}
 			} else if (options[currentOption] == "sair") {
 				System.exit(1);
 			}
@@ -61,9 +77,12 @@ public class Menu {
 			switch(spl2[0]) 
 			{
 				case "level":
-					World.restartGame("level"+spl[2]+".png");
+					World.restartGame("level"+spl2[1]+".png");
 					Game.gameState = "NORMAL";
 					pause = false;
+					break;
+				case "vida":
+					Game.player.life = Integer.parseInt(spl2[1]);
 					break;
 			}
 		}

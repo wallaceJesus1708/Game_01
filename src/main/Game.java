@@ -4,6 +4,7 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontFormatException;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
@@ -12,6 +13,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -56,12 +59,16 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 	
 	public UI ui;
 	
+	public InputStream stream = ClassLoader.getSystemClassLoader().getResourceAsStream("pixelart.tff");
+	public Font newFont;
+	
 	public static String gameState = "MENU";
 	private boolean showMessageGameOver = true;
 	private int framesGameOver = 0;
 	private boolean restartGame = false;
 	
 	public Menu menu;
+	public boolean saveGame = false;
 	
 	public Game() {
 		Sound.musicBackground.loop();
@@ -83,6 +90,17 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 		entities.add(player);
 		world = new World("/level1.png");
 		menu = new Menu();
+		
+		//teste com a nova fonte
+		/*try {
+			newFont = Font.createFont(Font.TRUETYPE_FONT, stream).deriveFont(16f);
+		} catch (FontFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
 		
 	}
 	
@@ -118,6 +136,15 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 	
 	public void tick() {
 		if(gameState == "NORMAL") {
+			
+			if(this.saveGame) {
+				this.saveGame = false;
+				String[] opt1 = {"level","vida"};
+				int[] opt2 = {this.CUR_LEVEL, (int)player.life};
+				Menu.saveGame(opt1, opt2, 10);
+				System.out.println("Jogo Salvo");
+			}
+			
 			this.restartGame = false;
 			for(int i = 0; i < entities.size(); i++) {
 				Entity e = entities.get(i);
@@ -209,6 +236,10 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 			menu.render(g);
 		}
 		
+		//g.setFont(newFont);
+		//g.setColor(Color.red);
+		//g.drawString("Teste com a nova fonte", 90, 90);
+				
 		bs.show();
 		
 	}
@@ -300,6 +331,10 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 			menu.pause = true;
 		}
 		
+		if(e.getKeyCode() == KeyEvent.VK_SPACE) {
+			if(gameState == "NORMAL")
+				this.saveGame = true;
+		}
 	}
 
 	@Override
