@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -71,11 +72,14 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 	public boolean saveGame = false;
 	
 	public Game() {
-		Sound.musicBackground.loop();
+		//Sound.musicBackground.loop();
 		rand = new Random();
 		addKeyListener(this);
 		addMouseListener(this);
-		setPreferredSize(new Dimension(WIDTH*SCALE, HEIGHT*SCALE));
+		//FullScreen
+		setPreferredSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize()));
+		
+		//setPreferredSize(new Dimension(WIDTH*SCALE, HEIGHT*SCALE));
 		initFrame();
 		
 		//Inicializando objetos
@@ -107,6 +111,9 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 	public void initFrame() {
 		frame = new JFrame("Game #1");
 		frame.add(this);
+		//fullscreen
+		frame.setUndecorated(true);
+		
 		frame.setResizable(false);
 		frame.pack();
 		frame.setLocationRelativeTo(null);
@@ -217,7 +224,8 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 		
 		g.dispose();
 		g = bs.getDrawGraphics();
-		g.drawImage(image, 0, 0, WIDTH*SCALE, HEIGHT*SCALE, null);
+		//g.drawImage(image, 0, 0, WIDTH*SCALE, HEIGHT*SCALE, null);
+		g.drawImage(image, 0, 0, Toolkit.getDefaultToolkit().getScreenSize().width, Toolkit.getDefaultToolkit().getScreenSize().height, null);
 		g.setFont(new Font("arial", Font.BOLD, 20));
 		g.setColor(Color.white);
 		g.drawString("Munição: " + player.ammo, 580, 20);
